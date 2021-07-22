@@ -18,8 +18,11 @@ import os
 from PIL import Image, ImageFile
 import numpy as np
 import tensorflow as tf
+#The images in AIRS include truncated training example.
 ImageFile.LOAD_TRUNCATED_IMAGES = True
+#The TIFF images are very large
 Image.MAX_IMAGE_PIXELS = None
+#Images are resized with bilinear filters
 for image in os.listdir('C:/Users/hsroc/Desktop/scrapings/image'):
     img_raw=Image.open('C:/Users/hsroc/Desktop/scrapings/image' + '/' + image)
     img_tensor=img_raw.resize((h, w), Image.BILINEAR)
@@ -53,6 +56,7 @@ for image in os.listdir('C:/Users/hsroc/Desktop/scrapings/trainval/val/label'):
     print(i)
     i=i+1
 i=0
+#The following code organizes the input data in a manner readable by Tensorflow 2
 for a in Xtrain:
     a=np.array(a)
     Xtrain1.append(a)
@@ -85,6 +89,7 @@ Xval=tf.dtypes.cast(tf.convert_to_tensor(Xval1), dtype=tf.float32)/255.
 ytrain=tf.dtypes.cast(tf.convert_to_tensor(ytrain1), dtype=tf.float32)/255.
 Xtest=tf.dtypes.cast(tf.convert_to_tensor(Xtest1), dtype=tf.float32)/255.
 inputs = tf.keras.layers.Input((h, w, channels))
+#The following code is an implementation of a UNet as described in https://arxiv.org/abs/1505.04597
 s=inputs
 c1 = tf.keras.layers.Conv2D(16, (3, 3), activation=tf.keras.activations.elu, kernel_initializer='he_normal',
                             padding='same')(s)
@@ -153,9 +158,23 @@ c9 = tf.keras.layers.Conv2D(16, (3, 3), activation=tf.keras.activations.elu, ker
                             padding='same')(c9)
  
 outputs = tf.keras.layers.Conv2D(1, (1, 1), activation='linear')(c9)
+#Model Optimization
 adam=tf.keras.optimizers.SGD(learning_rate=0.001, momentum=0.9, nesterov=True)
 model = tf.keras.Model(inputs=[inputs], outputs=[outputs])
 model.compile(optimizer=adam, loss='mean_squared_error', metrics=['accuracy'])
 model.summary()
-model.fit(x=Xtrain, y=ytrain, validation_data=(Xval,yval), shuffle=True, batch_size=batch_size, epochs=epochs, callbacks=[tf.keras.callbacks.EarlyStopping(monitor='accuracy', min_delta=0.005, patience=4, verbose=1, mode='max', baseline=None, restore_best_weights=True), tf.keras.callbacks.ReduceLROnPlateau(monitor='accuracy', factor=0.5, patience=3, verbose=2, mode='auto', min_delta=0.014, cooldown=0, min_lr=1e-4), tf.keras.callbacks.TensorBoard(log_dir=r'C:\Python Projects\ais\AI_logs', histogram_freq=3, write_graph=True, write_images=True, embeddings_freq=1, embeddings_layer_names=None, embeddings_metadata=None, embeddings_data=None, update_freq='batch')])
+#The model is fit with several keras callbacks, including Early Stopping for better iteration and experimentation
+model.fit(x=Xtrain, y=ytrain, validation_data=(Xval,yval), shuffle=True,
+          batch_size=batch_size, epochs=epochs,
+          callbacks=[tf.keras.callbacks.EarlyStopping(monitor='accuracy', min_delta=0.005, patience=4, verbose=1,
+                                                      mode='max', baseline=None, restore_best_weights=True),
+                     tf.keras.callbacks.ReduceLROnPlateau(monitor='accuracy', factor=0.5, patience=3, verbose=2,
+                                                          mode='auto', min_delta=0.014, cooldown=0, min_lr=1e-4),
+                     tf.keras.callbacks.TensorBoard(log_dir=r'C:\Python Projects\ais\AI_logs',
+                                                    histogram_freq=3, write_graph=True, write_images=True,
+                                                    embeddings_freq=1, embeddings_layer_names=None,
+                                                    embeddings_metadata=None, embeddings_data=None, update_freq='batch')
+                    ]
+         )
+
 model.save('C:/Python Projects/telhados_neur.h5')
