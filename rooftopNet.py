@@ -22,41 +22,41 @@ import tensorflow as tf
 ImageFile.LOAD_TRUNCATED_IMAGES = True
 #The TIFF images are very large
 Image.MAX_IMAGE_PIXELS = None
-#Images are resized with bilinear filters
-for image in os.listdir('C:/Users/hsroc/Desktop/scrapings/image'):
-    img_raw=Image.open('C:/Users/hsroc/Desktop/scrapings/image' + '/' + image)
-    img_tensor=img_raw.resize((h, w), Image.BILINEAR)
-    Xtest.append(img_tensor)
+#Images are resized with bilinear filters, simple and fast
+for image in os.listdir('scrapings/image'):
+    img_raw=Image.open('scrapings/image' + '/' + image)
+    img_filtered=img_raw.resize((h, w), Image.BILINEAR)
+    Xtest.append(img_filtered)
     print(i)
     i=i+1
-for image in os.listdir('C:/Users/hsroc/Desktop/scrapings/trainval/train/image'):
-    img_raw=Image.open('C:/Users/hsroc/Desktop/scrapings/trainval/train/image' + '/' + image)
-    img_tensor=img_raw.resize((h, w), Image.BILINEAR)
-    Xtrain.append(img_tensor)
+for image in os.listdir('scrapings/trainval/train/image'):
+    img_raw=Image.open('scrapings/trainval/train/image' + '/' + image)
+    img_filtered=img_raw.resize((h, w), Image.BILINEAR)
+    Xtrain.append(img_filtered)
     print(i)
     i=i+1
-for image in os.listdir('C:/Users/hsroc/Desktop/scrapings/trainval/train/label'):
-    img_raw=Image.open('C:/Users/hsroc/Desktop/scrapings/trainval/train/label' + '/' + image)
+for image in os.listdir('scrapings/trainval/train/label'):
+    img_raw=Image.open('scrapings/trainval/train/label' + '/' + image)
     if "vis" in str(image):
-        img_tensor=img_raw.resize((h, w), Image.BILINEAR)
-        ytrain.append(img_tensor)
+        img_filtered=img_raw.resize((h, w), Image.BILINEAR)
+        ytrain.append(img_filtered)
     print(i)
     i=i+1
-for image in os.listdir('C:/Users/hsroc/Desktop/scrapings/trainval/val/image'):
-    img_raw=Image.open('C:/Users/hsroc/Desktop/scrapings/trainval/val/image' + '/' + image)
-    img_tensor=img_raw.resize((h, w), Image.BILINEAR)
-    Xval.append(img_tensor)
+for image in os.listdir('scrapings/trainval/val/image'):
+    img_raw=Image.open('scrapings/trainval/val/image' + '/' + image)
+    img_filtered=img_raw.resize((h, w), Image.BILINEAR)
+    Xval.append(img_filtered)
     print(i)
     i=i+1
-for image in os.listdir('C:/Users/hsroc/Desktop/scrapings/trainval/val/label'):
-    img_raw=Image.open('C:/Users/hsroc/Desktop/scrapings/trainval/val/label' + '/' + image)
+for image in os.listdir('scrapings/trainval/val/label'):
+    img_raw=Image.open('scrapings/trainval/val/label' + '/' + image)
     if "vis" in str(image):
-        img_tensor=img_raw.resize((h, w), Image.BILINEAR)
-        yval.append(img_tensor)
+        img_filtered=img_raw.resize((h, w), Image.BILINEAR)
+        yval.append(img_filtered)
     print(i)
     i=i+1
 i=0
-#The following code organizes the input data in a manner readable by Tensorflow 2
+#The following code organizes the input data so that it is readable by Tensorflow 2
 for a in Xtrain:
     a=np.array(a)
     Xtrain1.append(a)
@@ -176,5 +176,5 @@ model.fit(x=Xtrain, y=ytrain, validation_data=(Xval,yval), shuffle=True,
                                                     embeddings_metadata=None, embeddings_data=None, update_freq='batch')
                     ]
          )
-
-model.save('C:/Python Projects/telhados_neur.h5')
+#Save trained model
+model.save('rooftop_neural_net.h5')
